@@ -8,6 +8,7 @@ import { SignUpDto } from './dto/signup.dto';
 import bcrypt from 'bcryptjs';
 import { SignInDto } from './dto/signin.dto';
 import { AuthService } from '../auth/auth.service';
+import { UpdateUserDto } from './dto/updateUser.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -96,6 +97,24 @@ export class UserService {
   async getProfile(userId: string) {
     return this.prisma.client.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        bio: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async updateProfile(userId: string, updateUserDto: UpdateUserDto) {
+    const { name, bio, avatar } = updateUserDto;
+
+    return this.prisma.client.user.update({
+      where: { id: userId },
+      data: { name, bio, avatar },
       select: {
         id: true,
         email: true,

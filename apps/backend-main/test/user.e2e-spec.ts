@@ -156,4 +156,58 @@ describe('UserController (e2e)', () => {
         .expect(401);
     });
   });
+
+  describe('PUT /users/profile', () => {
+    const updateData = {
+      name: 'Updated Name',
+      bio: 'Updated bio',
+      avatar: 'https://example.com/new-avatar.jpg',
+    };
+
+    it('should update authenticated user profile', async () => {
+      const response = await request(httpServer)
+        .put('/users/profile')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(200);
+
+      const body = response.body as UserResponse;
+      expect(body).toMatchObject({
+        email: testUser.email,
+        ...updateData,
+      });
+      expect(body).not.toHaveProperty('password');
+    });
+
+    it('should reject unauthorized request', async () => {
+      await request(httpServer)
+        .put('/users/profile')
+        .send(updateData)
+        .expect(401);
+    });
+
+    it('should reject invalid token', async () => {
+      await request(httpServer)
+        .put('/users/profile')
+        .set('Authorization', 'Bearer invalid-token')
+        .send(updateData)
+        .expect(401);
+    });
+
+    it('should allow partial updates', async () => {
+      const partialUpdate = { name: 'Partial Update' };
+      const response = await request(httpServer)
+        .put('/users/profile')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(partialUpdate)
+        .expect(200);
+
+      const body = response.body as UserResponse;
+      expect(body).toMatchObject({
+        name: partialUpdate.name,
+        bio: updateData.bio,
+        avatar: updateData.avatar,
+      });
+    });
+  });
 });
