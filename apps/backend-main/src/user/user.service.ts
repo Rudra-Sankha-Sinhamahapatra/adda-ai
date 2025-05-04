@@ -6,13 +6,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { SignUpDto } from './dto/signup.dto';
 import bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
 import { SignInDto } from './dto/signin.dto';
-import { JWT_SECRET } from '@repo/backend-common/jwt';
-
+import { AuthService } from '../auth/auth.service';
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   async signup(signUpDto: SignUpDto) {
     const { email, password, name, avatar, bio } = signUpDto;
@@ -44,7 +45,7 @@ export class UserService {
       },
     });
 
-    const token = this.generateToken(user.id);
+    const token = this.authService.generateToken(user.id);
     return {
       user,
       token,
@@ -76,7 +77,7 @@ export class UserService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.generateToken(user.id);
+    const token = this.authService.generateToken(user.id);
 
     return {
       user: {
@@ -115,12 +116,6 @@ export class UserService {
       data: {
         password: hashedPassword,
       },
-    });
-  }
-
-  private generateToken(userId: string): string {
-    return jwt.sign({ userId }, JWT_SECRET, {
-      expiresIn: '7d',
     });
   }
 }
