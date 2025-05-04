@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import prisma  from '@repo/db/db';
+import prisma from '@repo/db/db';
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
