@@ -1,0 +1,23 @@
+{
+  "name": "@repo/backend-common",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.2.1",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    "./jwt": "./src/jwt.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
+  }
+}
