@@ -13,6 +13,7 @@ interface AuthState {
   signOut: () => void;
   loadUser: () => Promise<void>;
   updateProfile: (data: { name?: string; email?: string }) => Promise<void>;
+  checkAuth: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -20,6 +21,26 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
   isAuthenticated: !!Cookies.get('token'),
+
+  checkAuth: async () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      set({ user: null, isAuthenticated: false });
+      return false;
+    }
+
+    try {
+      const user = await authApi.getProfile();
+      set({ user, isAuthenticated: true });
+      return true;
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      authApi.signOut();
+      set({ user: null, isAuthenticated: false });
+      toast.error("Session expired. Please log in again.");
+      return false;
+    }
+  },
 
   loadUser: async () => {
     const token = Cookies.get('token');

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Brain, TrendingUp, Star, MessageCircle, Heart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Search, Brain, TrendingUp, Star, MessageCircle, Heart, Loader2 } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import ProtectedRoute from '@/app/components/auth/protected-route';
+import { Character, characterApi } from '@/app/services/api';
+import toast from 'react-hot-toast';
 
 interface AICharacter {
   id: string;
@@ -19,57 +21,35 @@ interface AICharacter {
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [characters,setCharacters] = useState<Character[]>([]);
+  const [loading,setLoading] = useState(true);
 
-  const aiCharacters: AICharacter[] = [
-    {
-      id: '1',
-      name: 'Angry Masterji',
-      description: 'A strict but loving Indian teacher who gets annoyed easily but has a heart of gold',
-      personality: 'Strict, Passionate, Caring',
-      interactions: 12340,
-      rating: 4.8,
-      trending: true,
-      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgXv3JuYHVAi00wb-l1lb33QEuCyOqJhLGbA&s'
-    },
-    {
-      id: '2',
-      name: 'Doctor Ramakant',
-      description: 'A wise and experienced doctor who combines modern medicine with traditional wisdom',
-      personality: 'Wise, Calm, Professional',
-      interactions: 8902,
-      rating: 4.9,
-      trending: true,
-      imageUrl: 'https://ideogram.ai/assets/progressive-image/balanced/response/7SGQ7R5HSs6ijb0QJB5wdQ'
-    },
-    {
-      id: '3',
-      name: 'Techy Kirat',
-      description: 'A tech-savvy programmer who loves explaining complex concepts in simple terms',
-      personality: 'Enthusiastic, Nerdy, Helpful',
-      interactions: 5671,
-      rating: 4.7,
-      imageUrl: 'https://media.licdn.com/dms/image/v2/C5603AQFbOqG9og1S5g/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1517251237812?e=2147483647&v=beta&t=9ARUI1wnKPnPqqyy_Bmx7AK3mfJS-0zNzWp8-8Qu52g'
-    },
-    {
-      id: '4',
-      name: 'Angelina',
-      description: 'A friendly life coach who helps you navigate through personal and professional challenges',
-      personality: 'Empathetic, Motivating, Insightful',
-      interactions: 7892,
-      rating: 4.8,
-      imageUrl: 'https://ideogram.ai/assets/progressive-image/balanced/response/o03E5sdcTJeVPEAF5d2WzQ'
-    },
-    {
-      id: '5',
-      name: 'Chef Rajesh',
-      description: 'A passionate chef who shares cooking tips and stories from his culinary adventures',
-      personality: 'Creative, Passionate, Entertaining',
-      interactions: 4321,
-      rating: 4.6,
-      imageUrl: 'https://ideogram.ai/assets/progressive-image/balanced/response/kqqW1mfFT5OCexD0f62DIg'
-    },
-  ];
+  useEffect(() => {
+    fetchCharacters();
+  }, []);
 
+  const fetchCharacters = async () => {
+    const loadingToast = toast.loading('Loading characters...');
+    try {
+      setLoading(true);
+      const characters = await characterApi.getAllCharacters();
+      setCharacters(characters);
+      toast.success('Characters loaded successfully',{id:loadingToast});
+    } catch (error) {
+      toast.error('Error loading characters',{id:loadingToast});
+      console.error('Error loading characters:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredCharacters = characters.filter((character)=> 
+    character.name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
+    character.description.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
+    character.personality.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase())
+  );
+
+ 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
@@ -92,13 +72,18 @@ export default function ExplorePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search AI characters by name, personality, or interests..."
-                className="pl-10"
+                className="pl-10 py-4"
               />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
             </div>
-
+            {
+              loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <Loader2 className="h-10 w-10 animate-spin text-purple-600" />
+                </div>
+              ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {aiCharacters.map((character) => (
+              {filteredCharacters.map((character) => (
                 <div
                   key={character.id}
                   className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02]"
@@ -154,6 +139,13 @@ export default function ExplorePage() {
                 </div>
               ))}
             </div>
+               )
+              }
+              {!loading && filteredCharacters.length === 0 && (
+                <div className="text-center text-gray-600 mt-10">
+                 <p className='text-gray-500'>No characters found</p>
+                </div>
+              )}  
           </div>
         </div>
       </div>

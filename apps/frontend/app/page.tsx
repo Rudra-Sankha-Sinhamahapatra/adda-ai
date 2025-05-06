@@ -20,14 +20,14 @@ export default function Home() {
           {user ? (
             <div className="flex items-center gap-4">
               <Link href="/dashboard">
-                <Button variant="outline" className="border-purple-600 text-purple-600">
+                <Button variant="outline" className="border-purple-600 text-purple-600 hover:text-white hover:bg-purple-600 cursor-pointer">
                   Dashboard
                 </Button>
               </Link>
               <Button 
                 variant="ghost" 
                 onClick={() => signOut()}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-purple-600 cursor-pointer"
               >
                 Sign Out
               </Button>
@@ -35,10 +35,10 @@ export default function Home() {
           ) : (
             <div className="flex items-center gap-4">
               <Link href="/signin">
-                <Button variant="ghost">Sign In</Button>
+                <Button variant="ghost" className='hover:text-purple-600 cursor-pointer'>Sign In</Button>
               </Link>
               <Link href="/signup">
-                <Button className="bg-purple-600 text-white">Sign Up</Button>
+                <Button className="bg-purple-600 text-white cursor-pointer">Sign Up</Button>
               </Link>
             </div>
           )}

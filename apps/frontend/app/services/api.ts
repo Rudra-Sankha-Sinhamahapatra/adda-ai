@@ -79,3 +79,47 @@ export const authApi = {
     return response.data;
   },
 }; 
+
+export interface Character {
+  id: string;
+  name: string;
+  description: string;
+  personality: string;
+  imageUrl: string;
+  rating: number;
+  interactions: number;
+  trending: boolean;
+  status: string;
+}
+
+export const characterApi = {
+  async getAllCharacters(): Promise<Character[]> {
+     try {
+      const response = await api.get('/characters/all-characters');
+      return response.data;
+     } catch (error) {
+      console.log(error);
+      throw error;
+     }
+  },
+
+  async getCharacterById(id: string): Promise<Character> {
+    try {
+      const response = await api.get(`/characters/${id}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+
+  async getCharactersByUserId(userId: string): Promise<Character[]> {
+    try {
+      const response = await api.get(`/characters/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+}
