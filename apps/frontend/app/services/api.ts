@@ -1,7 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { config } from '@/config/config';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+const API_URL = config.backend.url || 'http://localhost:8080';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -10,7 +11,6 @@ const api = axios.create({
   }
 });
 
-// Add auth token to requests if it exists
 api.interceptors.request.use((config) => {
   const token = Cookies.get('token');
   if (token) {
@@ -44,7 +44,7 @@ const COOKIE_OPTIONS = {
   expires: 7, // 7 days
   path: '/',
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production'
+  secure: config.backend.isProduction,
 };
 
 export const authApi = {

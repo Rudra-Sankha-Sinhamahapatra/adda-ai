@@ -1,23 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Brain, TrendingUp, Star, MessageCircle, Heart, Loader2 } from 'lucide-react';
+import { Search, Brain, TrendingUp, Star, MessageCircle,Loader2 } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import ProtectedRoute from '@/app/components/auth/protected-route';
 import { Character, characterApi } from '@/app/services/api';
 import toast from 'react-hot-toast';
 
-interface AICharacter {
-  id: string;
-  name: string;
-  description: string;
-  personality: string;
-  interactions: number;
-  rating: number;
-  trending?: boolean;
-  imageUrl: string;
-}
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
