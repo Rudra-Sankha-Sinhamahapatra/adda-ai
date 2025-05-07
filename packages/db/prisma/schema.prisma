@@ -1,68 +1,63 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  name String?
-  password String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  avatar String?
-  bio String?  
+  id         String      @id @default(uuid())
+  email      String      @unique
+  name       String?
+  password   String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  avatar     String?
+  bio        String?
   characters Character[]
-  messages Message[]
+  messages   Message[]
 }
 
 model Character {
-  id String @id @default(uuid())
-  name String
-  description String?
-  personality String?
-  interactions Int @default(0)
-  rating Float @default(0)
-  ratingCount Int @default(0)
-  status CharacterStatus @default(ACTIVE)
-  trending Boolean @default(false)
-  imageUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId String
-  user User @relation(fields: [userId], references: [id])
-  messages Message[]
+  id           String          @id @default(uuid())
+  name         String
+  description  String?
+  personality  String?
+  interactions Int             @default(0)
+  rating       Float           @default(0)
+  ratingCount  Int             @default(0)
+  status       CharacterStatus @default(ACTIVE)
+  trending     Boolean         @default(false)
+  imageUrl     String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  messages     Message[]
+}
+
+model Message {
+  id          String                @id @default(uuid())
+  content     String
+  sender      MessageSender
+  timestamp   DateTime              @default(now())
+  characterId String
+  userId      String
+  isThinking  Boolean               @default(false)
+  metadata    Json?
+  embedding   Unsupported("vector(768)")
+  character   Character             @relation(fields: [characterId], references: [id])
+  user        User                  @relation(fields: [userId], references: [id])
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
 }
 
 enum CharacterStatus {
   ACTIVE
   INACTIVE
-}
-
-model Message {
-  id String @id @default(uuid())
-  content String
-  sender MessageSender
-  timestamp DateTime @default(now())
-
-  characterId String
-  character Character @relation(fields: [characterId], references: [id])
-  userId String
-  user User @relation(fields: [userId], references: [id])
-
-  isThinking Boolean @default(false)
-  metadata Json?
 }
 
 enum MessageSender {
