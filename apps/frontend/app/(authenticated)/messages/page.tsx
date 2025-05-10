@@ -1,53 +1,35 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Search, Brain, Star, User, Send, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import ProtectedRoute from '@/app/components/auth/protected-route';
-import { sendMessage, fetchMessages } from '@/app/services/messageService';
-import { Character, characterApi } from '@/app/services/api';
-import toast from 'react-hot-toast';
-import Cookies from 'js-cookie';
-
-interface Message {
-  id?: string;
-  content: string;
-  sender: 'USER' | 'CHARACTER' | {
-    name: string;
-    type: 'user' | 'ai';
-    avatar?: string;
-  };
-  timestamp?: string;
-  characterId: string;
-  userId?: string;
-  createdAt?: string;
-}
+import { useMessageStore } from '@/app/store/message.store';
 
 export default function MessagesPage() {
-  const [selectedCharacter, setSelectedCharacter] = useState<string>('');
-  const [message, setMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
+  const { 
+    messages, 
+    characters, 
+    selectedCharacter, 
+    message, 
+    searchQuery, 
+    isLoading: loading, 
+    sending,
+    setMessage,
+    setSearchQuery,
+    setSelectedCharacter,
+    fetchCharacters,
+    loadMessages,
+    sendMessage
+  } = useMessageStore();
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const userId = Cookies.get('userId');
 
   useEffect(() => {
     fetchCharacters();
-  }, []);
+  }, [fetchCharacters]);
 
-  useEffect(() => {
-    if (selectedCharacter && userId) {
-      fetchChatMessages(selectedCharacter, userId);
-    } else {
-      setMessages([]);
-    }
-  }, [selectedCharacter, userId]);
-  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -56,125 +38,11 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fetchCharacters = async () => {
-    const loadingToast = toast.loading('Loading characters...');
-    try {
-      setLoading(true);
-      const characters = await characterApi.getAllCharacters();
-      setCharacters(characters);
-      if (characters.length > 0) setSelectedCharacter(characters[0].id);
-      toast.success('Characters loaded successfully', { id: loadingToast });
-    } catch (error) {
-      toast.error('Error loading characters', { id: loadingToast });
-      console.error('Error loading characters:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchChatMessages = async (characterId: string, userId: string) => {
-    try {
-      setLoading(true);
-      const messagesData = await fetchMessages(characterId, userId);
-      
-      if (Array.isArray(messagesData)) {
-        setMessages(messagesData.map(formatMessage));
-      } else {
-        console.error('Unexpected message format:', messagesData);
-        setMessages([]);
-      }
-    } catch (error) {
-      toast.error('Failed to fetch messages');
-      console.error('Error fetching messages:', error);
-      setMessages([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const formatMessage = (msg: any): Message => {
-    return {
-      id: msg.id || undefined,
-      content: msg.content,
-      sender: msg.sender === 'USER' 
-        ? { name: 'You', type: 'user' }
-        : { name: 'AI', type: 'ai' },
-      characterId: msg.characterId,
-      userId: msg.userId,
-      timestamp: msg.createdAt || new Date().toISOString(),
-    };
-  };
-
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !selectedCharacter || !userId) return;
+    if (!message.trim() || !selectedCharacter) return;
     
-    const userMessage = message;
-    setMessage(''); 
-    setSending(true);
-    
-   
-    const userMessageObj: Message = {
-      content: userMessage,
-      sender: { name: 'You', type: 'user' },
-      characterId: selectedCharacter,
-      timestamp: new Date().toISOString(),
-    };
-    
-    setMessages(prev => [...prev, userMessageObj]);
-    
-    const aiMessageObj: Message = {
-      id: 'temp-' + Date.now(),
-      content: '',
-      sender: { name: 'AI', type: 'ai' },
-      characterId: selectedCharacter,
-      timestamp: new Date().toISOString(),
-    };
-    
-    setMessages(prev => [...prev, aiMessageObj]);
-    
-    try {
-      const result = await sendMessage({ 
-        content: userMessage, 
-        userId, 
-        characterId: selectedCharacter 
-      });
-      
-      if (result.stream) {
-        const reader = result.stream.getReader();
-        const decoder = new TextDecoder();
-        let aiResponse = '';
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value);
-          aiResponse += chunk;
-          
-          setMessages(prev => {
-            const newMessages = [...prev];
-            const aiMessageIndex = newMessages.length - 1;
-            if (aiMessageIndex >= 0) {
-              newMessages[aiMessageIndex] = {
-                ...newMessages[aiMessageIndex],
-                content: aiResponse,
-              };
-            }
-            return newMessages;
-          });
-        }
-        
-        toast.success('Message sent');
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-      
-      setMessages(prev => prev.filter(msg => msg.id !== aiMessageObj.id));
-    } finally {
-      setSending(false);
-    }
+    await sendMessage(message);
   };
 
   const filteredCharacters = characters.filter((character) =>
@@ -310,7 +178,7 @@ export default function MessagesPage() {
                         const senderType = typeof msg.sender === 'object' ? msg.sender.type : (msg.sender === 'USER' ? 'user' : 'ai');
                         return (
                           <div
-                            key={idx}
+                            key={msg.id || idx}
                             className={`flex ${senderType === 'user' ? 'justify-end' : 'justify-start'}`}
                           >
                             <div

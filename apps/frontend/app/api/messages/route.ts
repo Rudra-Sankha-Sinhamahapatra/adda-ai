@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       ],
       tools: {
         getConversationHistory: tool({
-          description: "Get previous messages between this user and character",
+          description: `Get previous messages between this user with userId ${userId} and character with characterId ${characterId} `,
           parameters: z.object({
             limit: z.number().default(10).describe("Maximum number of messages to retrieve")
           }),
