@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
 }
 
 model User {
@@ -40,19 +42,30 @@ model Character {
 }
 
 model Message {
-  id          String                @id @default(uuid())
+  id          String           @id @default(uuid())
   content     String
   sender      MessageSender
-  timestamp   DateTime              @default(now())
+  timestamp   DateTime         @default(now())
   characterId String
   userId      String
-  isThinking  Boolean               @default(false)
+  isThinking  Boolean         @default(false)
   metadata    Json?
-  embedding   Unsupported("vector(768)")
-  character   Character             @relation(fields: [characterId], references: [id])
-  user        User                  @relation(fields: [userId], references: [id])
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  character   Character       @relation(fields: [characterId], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  embedding   MessageEmbedding?
+
+  @@index([userId, characterId])
+}
+
+model MessageEmbedding {
+  id        String   @id @default(uuid())
+  messageId String   @unique
+  message   Message  @relation(fields: [messageId], references: [id],onDelete: Cascade)
+  embedding Unsupported("vector(768)")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum CharacterStatus {

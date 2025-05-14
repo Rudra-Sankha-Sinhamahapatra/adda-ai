@@ -7,6 +7,26 @@ import { config } from '@/config/config';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
+type MessageSender = 'USER' | 'CHARACTER';
+
+interface MessageData {
+  id: string;
+  content: string;
+  sender: MessageSender;
+  userId: string;
+  characterId: string;
+  metadata?: Record<string, unknown>;
+  updatedAt: string;
+  createdAt: string;
+}
+
+interface MessageEmbeddingData {
+  id: string;
+  messageId: string;
+  embedding: number[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 const API_KEY = config.gemini.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 if(!API_KEY) {
@@ -17,7 +37,13 @@ const googleAI = createGoogleGenerativeAI({
   apiKey: API_KEY
 });
 
-//post handler to send messages
+type MessageRole = 'user' | 'assistant';
+
+interface HistoryMessage {
+  role: MessageRole;
+  content: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
     console.log("Using API Key:", API_KEY ? "API key is present" : "No API key found");
@@ -33,36 +59,104 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
     }
 
+    let userMessageEmbedding: number[] | undefined;
     try {
-      const embedding = await getGeminiEmbedding(content);
-      
+      userMessageEmbedding = await getGeminiEmbedding(content);
+
       const now = new Date().toISOString();
       
-
-      const userMessageData = {
-        id: uuidv4(), 
+      const messageData: MessageData = {
+        id: uuidv4(),
         content,
-        embedding,
         sender: 'USER',
         userId,
         characterId,
+        metadata: {},
         updatedAt: now,
         createdAt: now
       };
 
-      const { error: insertError } = await supabaseAdmin
+      const { error: messageError } = await supabaseAdmin
         .from('Message')
-        .insert(userMessageData);
+        .insert(messageData);
 
-      if (insertError) {
-        console.error("Error storing user message:", insertError);
+      if (messageError) {
+        console.error("Error storing message:", messageError);
         return NextResponse.json({ error: "Failed to store message" }, { status: 500 });
+      }
+
+      if (userMessageEmbedding) {
+        const embeddingData: MessageEmbeddingData = {
+          id: uuidv4(),
+          messageId: messageData.id,
+          embedding: userMessageEmbedding,
+          createdAt: now,
+          updatedAt: now
+        };
+
+        const { error: embeddingError } = await supabaseAdmin
+          .from('MessageEmbedding')
+          .insert(embeddingData);
+
+        if (embeddingError) {
+          console.error("Error storing embedding:", embeddingError);
+        }
       }
     } catch (embeddingError) {
       console.error("Error generating user message embedding:", embeddingError);
       return NextResponse.json({ error: "Failed to generate embedding" }, { status: 500 });
     }
-
+    
+    let relevantHistory: HistoryMessage[] = [];
+    try {
+      if (userMessageEmbedding) {
+        const { data: similarMessages } = await supabaseAdmin.rpc('match_messages', {
+          query_embedding: userMessageEmbedding,
+          match_threshold: 0.7,
+          match_count: 5,
+          p_user_id: userId,
+          p_character_id: characterId
+        });
+        
+        if (similarMessages && similarMessages.length > 0) {
+          relevantHistory = similarMessages.map((msg: any) => ({
+            role: msg.sender === 'USER' ? 'user' : 'assistant',
+            content: msg.content
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching relevant history:", error);
+    }
+    
+    let recentMessages: HistoryMessage[] = [];
+    try {
+      const { data: recent } = await supabaseAdmin
+        .from('Message')
+        .select('content, sender, createdAt')
+        .eq('userId', userId)
+        .eq('characterId', characterId)
+        .order('createdAt', { ascending: false })
+        .limit(10);
+        
+      if (recent && recent.length > 0) {
+        recentMessages = recent.map((msg) => ({
+          role: msg.sender === 'USER' ? 'user' : 'assistant',
+          content: msg.content
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching recent messages:", error);
+    }
+    
+    const seenContents = new Set<string>();
+    const combinedMessages = [...relevantHistory, ...recentMessages]
+      .filter(msg => {
+        if (seenContents.has(msg.content)) return false;
+        seenContents.add(msg.content);
+        return true;
+      })
+      .slice(0, 10);
     
     const characterContext = `
       You are ${character.name}.
@@ -71,17 +165,22 @@ export async function POST(req: NextRequest) {
       
       Respond as this character with their unique personality and knowledge.
       Keep responses engaging, authentic to the character, and conversational.
+      
+      You have a memory system using vector embeddings that helps you recall 
+      previous conversations with this user. Use this context when appropriate 
+      to maintain continuity and demonstrate memory of past interactions.
     `.trim();
 
     const result = streamText({
       model: googleAI('gemini-2.0-flash'),
       system: characterContext,
       messages: [
+        ...combinedMessages,
         { role: 'user', content }
       ],
       tools: {
         getConversationHistory: tool({
-          description: `Get previous messages between this user with userId ${userId} and character with characterId ${characterId} `,
+          description: `Get previous messages between this user with userId ${userId} and character with characterId ${characterId}. If you don't have any messages, return an empty array.`,
           parameters: z.object({
             limit: z.number().default(10).describe("Maximum number of messages to retrieve")
           }),
@@ -113,26 +212,47 @@ export async function POST(req: NextRequest) {
           await writer.write(new TextEncoder().encode(chunk));
         }
         
-
         await writer.close();
         
         try {
           const aiEmbedding = await getGeminiEmbedding(aiResponse);
-   
           const now = new Date().toISOString();
           
-          const aiMessageData = {
-            id: uuidv4(), 
+          const aiMessageData: MessageData = {
+            id: uuidv4(),
             content: aiResponse,
-            embedding: aiEmbedding,
             sender: 'CHARACTER',
             userId,
             characterId,
+            metadata: {},
             updatedAt: now,
             createdAt: now
           };
           
-          await supabaseAdmin.from('Message').insert(aiMessageData);
+          const { error: messageError } = await supabaseAdmin
+            .from('Message')
+            .insert(aiMessageData);
+
+          if (messageError) {
+            console.error("Error storing AI message:", messageError);
+          } else if (aiEmbedding) {
+
+            const embeddingData: MessageEmbeddingData = {
+              id: uuidv4(),
+              messageId: aiMessageData.id,
+              embedding: aiEmbedding,
+              createdAt: now,
+              updatedAt: now
+            };
+
+            const { error: embeddingError } = await supabaseAdmin
+              .from('MessageEmbedding')
+              .insert(embeddingData);
+
+            if (embeddingError) {
+              console.error("Error storing AI embedding:", embeddingError);
+            }
+          }
         } catch (embeddingError) {
           console.error("Error generating AI response embedding:", embeddingError);
         }
@@ -149,12 +269,13 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET handler to fetch messages for a user and character
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const userId = url.searchParams.get('userId');
     const characterId = url.searchParams.get('characterId');
+    const query = url.searchParams.get('query');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
     
     if (!userId || !characterId) {
       return NextResponse.json(
@@ -163,18 +284,41 @@ export async function GET(req: NextRequest) {
       );
     }
     
+    if (query && query.trim() !== '') {
+      try {
+        const embedding = await getGeminiEmbedding(query);
+        
+        const { data, error } = await supabaseAdmin.rpc('match_messages', {
+          query_embedding: embedding,
+          match_threshold: 0.5,
+          match_count: limit,
+          p_user_id: userId,
+          p_character_id: characterId
+        });
+        
+        if (error) {
+          console.error("Error in semantic search:", error);
+        } else {
+          return NextResponse.json(data);
+        }
+      } catch (embeddingError) {
+        console.error("Error generating query embedding:", embeddingError);
+      }
+    }
+    
     const { data, error } = await supabaseAdmin
       .from('Message')
       .select('*')
       .eq('userId', userId)
       .eq('characterId', characterId)
-      .order('createdAt', { ascending: true });
-    
+      .order('createdAt', { ascending: true })
+      .limit(limit);
+  
     if (error) {
       console.error("Error fetching messages:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
+  
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error in GET messages:", error);

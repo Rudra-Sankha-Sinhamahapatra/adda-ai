@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Search, Brain, Star, User, Send, Clock, Sparkles } from 'lucide-react';
+import { Search, Brain, Star, User, Send, Clock, Sparkles, History } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import ProtectedRoute from '@/app/components/auth/protected-route';
@@ -13,6 +13,7 @@ export default function MessagesPage() {
     characters, 
     selectedCharacter, 
     message, 
+    currentUserId,
     searchQuery, 
     isLoading: loading, 
     sending,
@@ -21,10 +22,15 @@ export default function MessagesPage() {
     setSelectedCharacter,
     fetchCharacters,
     loadMessages,
-    sendMessage
+    sendMessage,
+    searchMessages
   } = useMessageStore();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const initialMessageSent = useRef<boolean>(false);
+
+  const currentCharacter = characters.find((char) => char.id === selectedCharacter);
 
   useEffect(() => {
     fetchCharacters();
@@ -33,6 +39,52 @@ export default function MessagesPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+
+  useEffect(() => {
+    const loadInitialMessages = async () => {
+      if (currentCharacter && currentUserId) {
+        initialMessageSent.current = false;
+        await loadMessages(currentCharacter.id, currentUserId);
+      }
+    };
+    loadInitialMessages();
+  }, [currentCharacter?.id, currentUserId]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const sendInitialHi = async () => {
+      if (!mounted) return;
+      
+      if (
+        currentCharacter?.id && 
+        currentUserId && 
+        messages.length === 0 && 
+        !sending && 
+        !loading && 
+        !initialMessageSent.current
+      ) {
+        try {
+          initialMessageSent.current = true;
+          await sendMessage("hi");
+          if (mounted) {
+            await loadMessages(currentCharacter.id, currentUserId);
+          }
+        } catch (error) {
+          console.error("Error sending initial message:", error);
+          if (mounted) {
+            initialMessageSent.current = false;
+          }
+        }
+      }
+    };
+
+    sendInitialHi();
+    return () => {
+      mounted = false;
+    };
+  }, [currentCharacter?.id, currentUserId, messages.length, sending, loading]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +96,13 @@ export default function MessagesPage() {
     
     await sendMessage(message);
   };
+  
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInputRef.current && searchInputRef.current.value.trim()) {
+      await searchMessages(searchInputRef.current.value);
+    }
+  };
 
   const filteredCharacters = characters.filter((character) =>
     character.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,7 +110,6 @@ export default function MessagesPage() {
     (character.personality || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const currentCharacter = characters.find((char) => char.id === selectedCharacter);
 
   return (
     <ProtectedRoute>
@@ -145,6 +203,17 @@ export default function MessagesPage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
+                    {/* Memory Search */}
+                    <form onSubmit={handleSearch} className="relative">
+                      <Button 
+                        type="submit"
+                        size="sm"
+                        variant="ghost"
+                        className="absolute right-2 top-1.5 text-purple-600"
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                    </form>
                     <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50">
                       <Clock className="h-5 w-5 mr-1" />
                       <span className="hidden sm:inline">History</span>
@@ -180,8 +249,8 @@ export default function MessagesPage() {
                           <div
                             key={msg.id || idx}
                             className={`flex ${senderType === 'user' ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
+                  >
+                    <div
                               className={`max-w-[80%] sm:max-w-[70%] flex ${
                                 senderType === 'user' ? 'flex-row-reverse' : 'flex-row'
                               } items-end`}
@@ -191,12 +260,12 @@ export default function MessagesPage() {
                                   <img
                                     src={currentCharacter?.imageUrl}
                                     alt={typeof msg.sender === 'object' ? msg.sender.name : 'AI'}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              <div
-                                className={`${
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div
+                        className={`${
                                   senderType === 'user'
                                     ? 'bg-purple-600 text-white rounded-tl-2xl rounded-tr-md rounded-bl-2xl'
                                     : 'bg-white text-gray-800 rounded-tr-2xl rounded-tl-md rounded-br-2xl shadow-md'
@@ -210,13 +279,13 @@ export default function MessagesPage() {
                                 </div>
                               )}
                             </div>
-                          </div>
+                      </div>
                         );
                       })}
                       <div ref={messagesEndRef} className="pt-2" />
                     </div>
                   )}
-                </div>
+                  </div>
               </div>
 
               {/* Message Input - Fixed at bottom */}
@@ -236,7 +305,7 @@ export default function MessagesPage() {
                   >
                     {sending ? 
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div> : 
-                      <Send className="h-5 w-5" />
+                    <Send className="h-5 w-5" />
                     }
                   </Button>
                 </form>
