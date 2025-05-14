@@ -1,0 +1,60 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Setup pnpm 
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate
+
+# Install NestJS CLI globally
+RUN npm i -g @nestjs/cli@latest
+
+# Copy package files
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY turbo.json ./
+
+# Copy only needed packages
+COPY packages/backend-common ./packages/backend-common
+COPY packages/db ./packages/db
+COPY apps/backend-main ./apps/backend-main
+
+# Initial install
+RUN pnpm install --frozen-lockfile
+
+# Generate Prisma client
+RUN pnpm db:generate
+
+# Install again to link the generated Prisma client
+RUN pnpm install --frozen-lockfile
+
+# Build the application
+RUN cd apps/backend-main && pnpm run build
+
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Setup pnpm once
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate
+
+# Copy all necessary files
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/turbo.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+
+# Copy the entire apps and packages directories
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps ./apps
+
+# Install production dependencies, generate Prisma client, and reinstall to link it
+RUN pnpm install --frozen-lockfile --prod && \
+    pnpm db:generate && \
+    pnpm install --frozen-lockfile --prod
+
+EXPOSE 8080
+
+CMD ["node", "apps/backend-main/dist/main.js"]
