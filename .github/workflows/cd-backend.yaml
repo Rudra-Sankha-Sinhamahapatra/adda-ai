@@ -33,10 +33,10 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull rudrasankha/user-backend:${{ github.sha }}
-            docker stop user-backend || true
-            docker rm user-backend || true
-            docker run -d --name user-backend \
+            docker pull rudrasankha/adda-backend:${{ github.sha }}
+            docker stop adda-backend || true
+            docker rm adda-backend || true
+            docker run -d --name adda-backend \
               -p 8080:8080 \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               -e PORT=${{ secrets.PORT }} \
