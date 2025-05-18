@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react';
 import { Search, Brain, Star, User, Send, Clock, Sparkles, History } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
-import ProtectedRoute from '@/app/components/auth/protected-route';
-import { useMessageStore } from '@/app/store/message.store';
+import ProtectedRoute from '../../components/auth/protected-route';
+import { useMessageStore } from '../../store/message.store';
 
 export default function MessagesPage() {
   const { 

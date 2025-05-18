@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
+import { Route } from 'next';
 
 export default function ProtectedRoute({
   children,
@@ -18,7 +19,7 @@ export default function ProtectedRoute({
       setIsLoading(true);
       const isValid = await checkAuth();
       if (!isValid) {
-        router.push('/login');
+        router.push('/login' as Route);
       }
       setIsLoading(false);
     };

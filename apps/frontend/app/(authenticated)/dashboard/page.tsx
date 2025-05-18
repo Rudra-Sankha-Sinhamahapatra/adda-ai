@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/app/store/auth.store';
+import { useAuthStore } from '../../store/auth.store';
 
 export default function Dashboard() {
   const user = useAuthStore((state) => state.user);

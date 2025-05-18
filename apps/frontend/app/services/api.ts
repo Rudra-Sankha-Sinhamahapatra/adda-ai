@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { config } from '@/config/config';
+import { config } from '../../config/config';
 
 const API_URL = config.backend.url || 'http://localhost:8080';
 

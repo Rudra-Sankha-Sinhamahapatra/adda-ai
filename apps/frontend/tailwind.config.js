@@ -2,8 +2,6 @@
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
     '@repo/ui/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
@@ -35,6 +33,8 @@ module.exports = {
           900: '#831843',
           950: '#500724',
         },
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
@@ -58,5 +58,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ]
 }; 

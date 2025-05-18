@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Bell, Lock, User, Moon, Globe, Shield, ChevronRight } from 'lucide-react';
-import ProtectedRoute from '@/app/components/auth/protected-route';
+import ProtectedRoute from '../../components/auth/protected-route';
 
 interface SettingSection {
   id: string;

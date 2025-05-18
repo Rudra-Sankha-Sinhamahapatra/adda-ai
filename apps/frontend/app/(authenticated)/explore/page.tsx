@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { Search, Brain, TrendingUp, Star, MessageCircle,Loader2 } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
-import ProtectedRoute from '@/app/components/auth/protected-route';
-import { Character, characterApi } from '@/app/services/api';
+import ProtectedRoute from '../../components/auth/protected-route';
+import { Character, characterApi } from '../../services/api';
 import toast from 'react-hot-toast';
 
 

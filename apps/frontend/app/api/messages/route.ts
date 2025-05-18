@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGeminiEmbedding } from '@/lib/embeddingUtils';
-import { supabaseAdmin } from '@/lib/supabaseClient';
+import { getGeminiEmbedding } from '../../../lib/embeddingUtils';
+import { supabaseAdmin } from '../../../lib/supabaseClient';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamText, tool } from 'ai';
-import { config } from '@/config/config';
+import { config } from '../../../config/config';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 

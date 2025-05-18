@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@repo/ui/button';
 import { ChevronRight, MessageCircle, Users, Sparkles, Globe, Shield, Zap } from 'lucide-react';
 import { useAuthStore } from './store/auth.store';
+import { Route } from 'next';
 
 export default function Home() {
   const user = useAuthStore((state) => state.user);
@@ -77,7 +78,7 @@ export default function Home() {
                 </Button>
               </Link>
             )}
-            <Link href="/about">
+            <Link href={'/about' as Route}>
               <Button variant="outline" size="lg" className="min-w-[200px] py-2 cursor-pointer border-purple-600">
                 Learn More
               </Button>
@@ -217,7 +218,7 @@ export default function Home() {
                 </Button>
               </Link>
             )}
-            <Link href="/about">
+            <Link href={'/about' as Route}>
               <Button size="lg" variant="outline" className="min-w-[200px] border-white text-white hover:bg-white/10">
                 Learn More
               </Button>

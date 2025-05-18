@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
-import { useAuthStore } from '@/app/store/auth.store';
+import { useAuthStore } from '../../store/auth.store';
 
 export default function Profile() {
   const router = useRouter();

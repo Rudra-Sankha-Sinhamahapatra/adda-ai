@@ -1,7 +1,7 @@
 export const config = {
   backend: {
     url: process.env.NEXT_PUBLIC_BACKEND_URL || "",
-    isProduction: process.env.NODE_ENV === "production",
+    isProduction: process.env.SKIP_ENV === "production",
   },
   database: {
     url: process.env.DATABASE_URL || "",

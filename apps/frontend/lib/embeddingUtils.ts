@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { embed } from "ai"
-import { config } from "@/config/config"
+import { config } from "../config/config"
 
 
 const API_KEY = config.gemini.apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
