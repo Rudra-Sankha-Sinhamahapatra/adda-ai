@@ -51,41 +51,6 @@ export default function MessagesPage() {
     loadInitialMessages();
   }, [currentCharacter?.id, currentUserId]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const sendInitialHi = async () => {
-      if (!mounted) return;
-      
-      if (
-        currentCharacter?.id && 
-        currentUserId && 
-        messages.length === 0 && 
-        !sending && 
-        !loading && 
-        !initialMessageSent.current
-      ) {
-        try {
-          initialMessageSent.current = true;
-          await sendMessage("hi");
-          if (mounted) {
-            await loadMessages(currentCharacter.id, currentUserId);
-          }
-        } catch (error) {
-          console.error("Error sending initial message:", error);
-          if (mounted) {
-            initialMessageSent.current = false;
-          }
-        }
-      }
-    };
-
-    sendInitialHi();
-    return () => {
-      mounted = false;
-    };
-  }, [currentCharacter?.id, currentUserId, messages.length, sending, loading]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };

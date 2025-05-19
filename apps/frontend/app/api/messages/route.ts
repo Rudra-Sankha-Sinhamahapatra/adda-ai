@@ -212,6 +212,11 @@ export async function POST(req: NextRequest) {
           await writer.write(new TextEncoder().encode(chunk));
         }
         
+        if (!aiResponse || aiResponse.trim() === '') {
+          aiResponse = "I'm sorry, I don't remember anything from our previous conversations.";
+          await writer.write(new TextEncoder().encode(aiResponse));
+        }
+        
         await writer.close();
         
         try {
