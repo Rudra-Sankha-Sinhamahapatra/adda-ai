@@ -21,7 +21,7 @@
       "dependsOn": ["^build"],
       "env": [
         "NEXT_PUBLIC_BACKEND_URL",
-        "NODE_ENV",
+        "SKIP_ENV",
         "PINECONE_API_KEY",
         "DATABASE_URL",
         "DIRECT_URL",
