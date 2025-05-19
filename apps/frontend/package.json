@@ -14,6 +14,7 @@
     "@repo/ui": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",
     "@types/js-cookie": "^3.0.6",
+    "@vercel/analytics": "^1.5.0",
     "ai": "^4.3.14",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",

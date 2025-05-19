@@ -1,6 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import AuthProvider from './components/providers/auth-provider';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
   title: 'Adda AI - Connect, Share, and Grow Together',
@@ -19,6 +20,7 @@ export default function RootLayout({
           <Toaster position="top-right" />
           {children}
         </AuthProvider>
+        <Analytics mode="production"/>
       </body>
     </html>
   );

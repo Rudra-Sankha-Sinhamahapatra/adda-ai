@@ -1,36 +1,36 @@
 import {
-  Body,
+  // Body,
   Controller,
-  Delete,
+  // Delete,
   Get,
   Param,
-  Post,
-  Put,
-  Request,
+  // Post,
+  // Put,
+  // Request,
   UseGuards,
 } from '@nestjs/common';
 import { CharacterService } from './character.service';
-import { CreateCharacterDto } from './dto/createCharacter.dto';
-import { UpdateCharacterDto } from './dto/updateCharacter.dto';
+// import { CreateCharacterDto } from './dto/createCharacter.dto';
+// import { UpdateCharacterDto } from './dto/updateCharacter.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('characters')
 export class CharacterController {
   constructor(private readonly characterService: CharacterService) {}
 
-  @Post('create-character')
-  createCharacter(@Body() createCharacterDto: CreateCharacterDto) {
-    return this.characterService.createCharacter(createCharacterDto);
-  }
+  // @Post('create-character')
+  // createCharacter(@Body() createCharacterDto: CreateCharacterDto) {
+  //   return this.characterService.createCharacter(createCharacterDto);
+  // }
 
-  @Put('update-character/:id')
-  updateCharacter(
-    @Param('id') id: string,
-    @Body() updateCharacterDto: UpdateCharacterDto,
-    @Request() req: { user: { userId: string } },
-  ) {
-    return this.characterService.updateCharacter(id, updateCharacterDto, req);
-  }
+  // @Put('update-character/:id')
+  // updateCharacter(
+  //   @Param('id') id: string,
+  //   @Body() updateCharacterDto: UpdateCharacterDto,
+  //   @Request() req: { user: { userId: string } },
+  // ) {
+  //   return this.characterService.updateCharacter(id, updateCharacterDto, req);
+  // }
 
   @UseGuards(AuthGuard)
   @Get('all-characters')
@@ -44,14 +44,14 @@ export class CharacterController {
     return this.characterService.getCharacterById(id);
   }
 
-  @UseGuards(AuthGuard)
-  @Delete('character/:id')
-  deleteCharacter(
-    @Param('id') id: string,
-    @Request() req: { user: { userId: string } },
-  ) {
-    return this.characterService.deleteCharacter(id, req);
-  }
+  // @UseGuards(AuthGuard)
+  // @Delete('character/:id')
+  // deleteCharacter(
+  //   @Param('id') id: string,
+  //   @Request() req: { user: { userId: string } },
+  // ) {
+  //   return this.characterService.deleteCharacter(id, req);
+  // }
 
   @UseGuards(AuthGuard)
   @Get('characters-by-user/:userId')
