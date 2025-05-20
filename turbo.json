@@ -29,7 +29,8 @@
         "SUPABASE_ANON_KEY",
         "SUPABASE_SERVICE_ROLE_KEY",
         "GEMINI_API_KEY"
-      ]
+      ],
+      "outputs": [".next/**", "!.next/cache/**"]
     }
   }
 }
