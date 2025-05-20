@@ -190,7 +190,7 @@ export default function SignUp() {
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    // Implement OAuth sign up
+                    alert('This feature is coming soon, Kindly sign up with email and password');
                   }}
                 >
                   <svg

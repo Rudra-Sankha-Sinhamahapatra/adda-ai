@@ -148,7 +148,7 @@ export default function SignIn() {
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    // Implement OAuth sign in
+                    alert('This feature is coming soon, Kindly login with email and password');
                   }}
                 >
                   <svg

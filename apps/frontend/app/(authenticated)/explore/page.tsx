@@ -7,12 +7,15 @@ import { Input } from '@repo/ui/input';
 import ProtectedRoute from '../../components/auth/protected-route';
 import { Character, characterApi } from '../../services/api';
 import toast from 'react-hot-toast';
-
+import { useRouter } from 'next/navigation';
+import { useMessageStore } from '../../store/message.store';
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [characters,setCharacters] = useState<Character[]>([]);
   const [loading,setLoading] = useState(true);
+  const router = useRouter();
+  const { setSelectedCharacter } = useMessageStore();
 
   useEffect(() => {
     fetchCharacters();
@@ -50,7 +53,9 @@ export default function ExplorePage() {
                 <h1 className="text-3xl font-bold text-gray-900">Explore AI Characters</h1>
                 <p className="text-gray-600 mt-2">Chat with unique AI personalities and make new connections</p>
               </div>
-              <Button className="bg-purple-600 text-white">
+              <Button className="bg-purple-600 text-white" onClick={()=>{
+                alert('This feature is coming soon');
+              }}>
                 <Brain className="h-5 w-5 mr-2" />
                 Suggest Character
               </Button>
@@ -121,7 +126,10 @@ export default function ExplorePage() {
                         <MessageCircle className="h-4 w-4 mr-1" />
                         {character.interactions.toLocaleString()} chats
                       </div>
-                      <Button className="bg-purple-600 text-white">
+                      <Button className="bg-purple-600 text-white" onClick={() => { 
+                        setSelectedCharacter(character.id);
+                        router.push('/messages');
+                      }}>
                         Start Chat
                       </Button>
                     </div>

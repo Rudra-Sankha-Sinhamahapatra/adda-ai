@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Search, Brain, Star, User, Send, Clock, Sparkles, History, ArrowLeft } from 'lucide-react';
+import { Search, Brain, Star, User, Send, Clock, Sparkles, History, ArrowLeft, MessageCircle } from 'lucide-react';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import ProtectedRoute from '../../components/auth/protected-route';
@@ -38,10 +38,6 @@ export default function MessagesPage() {
   }, [fetchCharacters]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
     if (selectedCharacter && (window.innerWidth < 1024)) {
       setShowChatMobile(true);
     }
@@ -56,6 +52,10 @@ export default function MessagesPage() {
     };
     loadInitialMessages();
   }, [currentCharacter?.id, currentUserId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -88,10 +88,10 @@ export default function MessagesPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
         <div className="container mx-auto px-0 md:px-4 py-0 md:py-6">
-          <div className="grid grid-cols-12 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[85vh]">
+          <div className={`grid grid-cols-12 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[85vh] ${!selectedCharacter ? 'md:grid-cols-4 lg:grid-cols-3' : ''}`}>
           
             {(!isMobileOrTablet || !showChatMobile) && (
-              <div className="col-span-12 md:col-span-4 lg:col-span-3 border-r border-gray-200 bg-white">
+              <div className={`${selectedCharacter ? 'hidden lg:block lg:col-span-3' : 'col-span-12'} border-r border-gray-200 bg-white`}>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-xl font-bold text-gray-900">AI Characters</h2>
@@ -154,7 +154,7 @@ export default function MessagesPage() {
             )}
 
             {(selectedCharacter && (!isMobileOrTablet || showChatMobile)) && (
-              <div className="col-span-12 md:col-span-8 lg:col-span-9 flex flex-col h-[85vh]">
+              <div className="col-span-12 lg:col-span-9 flex flex-col h-[85vh]">
    
                 {currentCharacter && (
                   <div className="py-4 px-6 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm sticky top-0 z-10">
@@ -291,6 +291,18 @@ export default function MessagesPage() {
                       }
                     </Button>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {!selectedCharacter && (
+              <div className="hidden md:flex md:col-span-8 lg:col-span-9 items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <div className="bg-purple-100 p-4 rounded-full mb-4 mx-auto w-16 h-16 flex items-center justify-center">
+                    <MessageCircle className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Character</h3>
+                  <p className="text-gray-600">Choose an AI character from the list to start chatting</p>
                 </div>
               </div>
             )}

@@ -67,10 +67,11 @@ export const useMessageStore = create<MessageState>((set, get) => ({
         try {
             set({ isLoading: true });
             const characters = await characterApi.getAllCharacters();
+            const currentSelected = get().selectedCharacter;
             set({
                 characters,
-                selectedCharacter: characters.length > 0 ? characters[0].id : '',
-                isLoading: false
+                isLoading: false,
+                selectedCharacter: currentSelected || ''
             });
             toast.success("Characters loaded successfully", { id: loadingToast });
         } catch (error) {
