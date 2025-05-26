@@ -1,21 +1,32 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { Search, Brain, Star, User, Send, Clock, Sparkles, History, ArrowLeft, MessageCircle } from 'lucide-react';
-import { Button } from '@repo/ui/button';
-import { Input } from '@repo/ui/input';
-import ProtectedRoute from '../../components/auth/protected-route';
-import { useMessageStore } from '../../store/message.store';
+import { useEffect, useRef, useState } from "react";
+import {
+  Search,
+  Brain,
+  Star,
+  User,
+  Send,
+  Clock,
+  Sparkles,
+  History,
+  ArrowLeft,
+  MessageCircle,
+} from "lucide-react";
+import { Button } from "@repo/ui/button";
+import { Input } from "@repo/ui/input";
+import ProtectedRoute from "../../components/auth/protected-route";
+import { useMessageStore } from "../../store/message.store";
 
 export default function MessagesPage() {
-  const { 
-    messages, 
-    characters, 
-    selectedCharacter, 
-    message, 
+  const {
+    messages,
+    characters,
+    selectedCharacter,
+    message,
     currentUserId,
-    searchQuery, 
-    isLoading: loading, 
+    searchQuery,
+    isLoading: loading,
     sending,
     setMessage,
     setSearchQuery,
@@ -23,22 +34,24 @@ export default function MessagesPage() {
     fetchCharacters,
     loadMessages,
     sendMessage,
-    searchMessages
+    searchMessages,
   } = useMessageStore();
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const initialMessageSent = useRef<boolean>(false);
   const [showChatMobile, setShowChatMobile] = useState(false);
 
-  const currentCharacter = characters.find((char) => char.id === selectedCharacter);
+  const currentCharacter = characters.find(
+    (char) => char.id === selectedCharacter
+  );
 
   useEffect(() => {
     fetchCharacters();
   }, [fetchCharacters]);
 
   useEffect(() => {
-    if (selectedCharacter && (window.innerWidth < 1024)) {
+    if (selectedCharacter && window.innerWidth < 1024) {
       setShowChatMobile(true);
     }
   }, [selectedCharacter]);
@@ -58,16 +71,16 @@ export default function MessagesPage() {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !selectedCharacter) return;
-    
+
     await sendMessage(message);
   };
-  
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchInputRef.current && searchInputRef.current.value.trim()) {
@@ -75,27 +88,39 @@ export default function MessagesPage() {
     }
   };
 
-  const filteredCharacters = characters.filter((character) =>
-    character.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    character.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (character.personality || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCharacters = characters.filter(
+    (character) =>
+      character.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      character.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (character.personality || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
- 
-  const isMobileOrTablet = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobileOrTablet =
+    typeof window !== "undefined" && window.innerWidth < 1024;
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
         <div className="container mx-auto px-0 md:px-4 py-0 md:py-6">
-          <div className={`grid grid-cols-12 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[85vh] ${!selectedCharacter ? 'md:grid-cols-4 lg:grid-cols-3' : ''}`}>
-          
+          <div
+            className={`grid grid-cols-12 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[85vh] ${!selectedCharacter ? "md:grid-cols-4 lg:grid-cols-3" : ""}`}
+          >
             {(!isMobileOrTablet || !showChatMobile) && (
-              <div className={`${selectedCharacter ? 'hidden lg:block lg:col-span-3' : 'col-span-12'} border-r border-gray-200 bg-white`}>
+              <div
+                className={`${selectedCharacter ? "hidden lg:block lg:col-span-3" : "col-span-12"} border-r border-gray-200 bg-white`}
+              >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-bold text-gray-900">AI Characters</h2>
-                    <Button variant="ghost" size="sm" className="text-purple-600 hover:bg-purple-50">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      AI Characters
+                    </h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-purple-600 hover:bg-purple-50"
+                    >
                       <Brain className="h-5 w-5" />
                     </Button>
                   </div>
@@ -109,7 +134,7 @@ export default function MessagesPage() {
                     />
                     <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                   </div>
-                  
+
                   <div className="space-y-3">
                     {filteredCharacters.map((character) => (
                       <button
@@ -120,8 +145,8 @@ export default function MessagesPage() {
                         }}
                         className={`w-full p-3.5 rounded-xl flex items-center space-x-4 transition-all ${
                           selectedCharacter === character.id
-                            ? 'bg-purple-100 text-purple-700 shadow-sm'
-                            : 'hover:bg-gray-50 text-gray-800'
+                            ? "bg-purple-100 text-purple-700 shadow-sm"
+                            : "hover:bg-gray-50 text-gray-800"
                         }`}
                       >
                         <div className="relative flex-shrink-0">
@@ -132,19 +157,21 @@ export default function MessagesPage() {
                               className="w-full h-full object-cover"
                             />
                           </div>
-                          <span 
+                          <span
                             className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${
-                              character.status === 'online'
-                                ? 'bg-green-400'
-                                : character.status === 'thinking'
-                                ? 'bg-yellow-400'
-                                : 'bg-gray-400'
+                              character.status === "online"
+                                ? "bg-green-400"
+                                : character.status === "thinking"
+                                  ? "bg-yellow-400"
+                                  : "bg-gray-400"
                             }`}
                           />
                         </div>
                         <div className="flex-1 text-left">
                           <h3 className="font-semibold">{character.name}</h3>
-                          <p className="text-sm text-gray-500 truncate">{character.description}</p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {character.description}
+                          </p>
                         </div>
                       </button>
                     ))}
@@ -153,15 +180,20 @@ export default function MessagesPage() {
               </div>
             )}
 
-            {(selectedCharacter && (!isMobileOrTablet || showChatMobile)) && (
+            {selectedCharacter && (!isMobileOrTablet || showChatMobile) && (
               <div className="col-span-12 lg:col-span-9 flex flex-col h-[85vh]">
-   
                 {currentCharacter && (
                   <div className="py-4 px-6 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm sticky top-0 z-10">
                     <div className="flex items-center space-x-4">
-           
                       {isMobileOrTablet && (
-                        <Button variant="ghost" size="icon" onClick={() => setShowChatMobile(false)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => { 
+                            setShowChatMobile(false)
+                            setSelectedCharacter(null)
+                          }}
+                        >
                           <ArrowLeft className="h-6 w-6 text-purple-600" />
                         </Button>
                       )}
@@ -174,21 +206,26 @@ export default function MessagesPage() {
                       </div>
                       <div>
                         <div className="flex items-center space-x-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{currentCharacter.name}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {currentCharacter.name}
+                          </h3>
                           <div className="flex items-center text-yellow-500">
                             <Star className="h-4 w-4 fill-current" />
-                            <span className="ml-1 text-sm">{currentCharacter.rating}</span>
+                            <span className="ml-1 text-sm">
+                              {currentCharacter.rating}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2 text-sm">
-                          <span className="text-gray-600">{currentCharacter.personality}</span>
+                          <span className="text-gray-600">
+                            {currentCharacter.personality}
+                          </span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-   
                       <form onSubmit={handleSearch} className="relative">
-                        <Button 
+                        <Button
                           type="submit"
                           size="sm"
                           variant="ghost"
@@ -197,11 +234,19 @@ export default function MessagesPage() {
                           <History className="h-4 w-4" />
                         </Button>
                       </form>
-                      <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                      >
                         <Clock className="h-5 w-5 mr-1" />
                         <span className="hidden sm:inline">History</span>
                       </Button>
-                      <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                      >
                         <Sparkles className="h-5 w-5 mr-1" />
                         <span className="hidden sm:inline">Boost</span>
                       </Button>
@@ -209,8 +254,10 @@ export default function MessagesPage() {
                   </div>
                 )}
 
-  
-                <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-white" style={{ height: "calc(85vh - 140px)" }}>
+                <div
+                  className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-white"
+                  style={{ height: "calc(85vh - 140px)" }}
+                >
                   <div className="p-6">
                     {loading ? (
                       <div className="flex justify-center items-center h-64">
@@ -221,42 +268,59 @@ export default function MessagesPage() {
                         <div className="bg-purple-100 p-4 rounded-full mb-4">
                           <Brain className="h-16 w-16 text-purple-500" />
                         </div>
-                        <p className="text-lg font-medium">Start a conversation with {currentCharacter?.name}</p>
-                        <p className="text-sm text-gray-400 mt-2">Type a message below to begin chatting</p>
+                        <p className="text-lg font-medium">
+                          Start a conversation with {currentCharacter?.name}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-2">
+                          Type a message below to begin chatting
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-6">
                         {messages.map((msg, idx) => {
-                          const senderType = typeof msg.sender === 'object' ? msg.sender.type : (msg.sender === 'USER' ? 'user' : 'ai');
+                          const senderType =
+                            typeof msg.sender === "object"
+                              ? msg.sender.type
+                              : msg.sender === "USER"
+                                ? "user"
+                                : "ai";
                           return (
                             <div
                               key={msg.id || idx}
-                              className={`flex ${senderType === 'user' ? 'justify-end' : 'justify-start'}`}
+                              className={`flex ${senderType === "user" ? "justify-end" : "justify-start"}`}
                             >
                               <div
                                 className={`max-w-[80%] sm:max-w-[70%] flex ${
-                                  senderType === 'user' ? 'flex-row-reverse' : 'flex-row'
+                                  senderType === "user"
+                                    ? "flex-row-reverse"
+                                    : "flex-row"
                                 } items-end`}
                               >
-                                {senderType === 'ai' && (
+                                {senderType === "ai" && (
                                   <div className="h-8 w-8 rounded-full overflow-hidden mr-3 mb-1 border-2 border-white shadow-sm flex-shrink-0">
                                     <img
                                       src={currentCharacter?.imageUrl}
-                                      alt={typeof msg.sender === 'object' ? msg.sender.name : 'AI'}
+                                      alt={
+                                        typeof msg.sender === "object"
+                                          ? msg.sender.name
+                                          : "AI"
+                                      }
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
                                 )}
                                 <div
                                   className={`${
-                                    senderType === 'user'
-                                      ? 'bg-purple-600 text-white rounded-tl-2xl rounded-tr-md rounded-bl-2xl'
-                                      : 'bg-white text-gray-800 rounded-tr-2xl rounded-tl-md rounded-br-2xl shadow-md'
+                                    senderType === "user"
+                                      ? "bg-purple-600 text-white rounded-tl-2xl rounded-tr-md rounded-bl-2xl"
+                                      : "bg-white text-gray-800 rounded-tr-2xl rounded-tl-md rounded-br-2xl shadow-md"
                                   } p-4`}
                                 >
-                                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                                    {msg.content}
+                                  </p>
                                 </div>
-                                {senderType === 'user' && (
+                                {senderType === "user" && (
                                   <div className="h-8 w-8 rounded-full overflow-hidden ml-3 mb-1 bg-purple-200 flex items-center justify-center flex-shrink-0 mr-2">
                                     <User className="h-5 w-5 text-purple-700" />
                                   </div>
@@ -270,25 +334,28 @@ export default function MessagesPage() {
                     )}
                   </div>
                 </div>
-         
+
                 <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
                   <form onSubmit={handleSend} className="flex space-x-3">
                     <Input
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder={`Message ${currentCharacter?.name || ''}...`}
+                      placeholder={`Message ${currentCharacter?.name || ""}...`}
                       disabled={sending || !selectedCharacter}
                       className="flex-1 py-3 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-purple-500 focus:border-purple-500"
                     />
-                    <Button 
-                      type="submit" 
-                      disabled={sending || !message.trim() || !selectedCharacter}
+                    <Button
+                      type="submit"
+                      disabled={
+                        sending || !message.trim() || !selectedCharacter
+                      }
                       className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl px-5"
                     >
-                      {sending ? 
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div> : 
+                      {sending ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      ) : (
                         <Send className="h-5 w-5" />
-                      }
+                      )}
                     </Button>
                   </form>
                 </div>
@@ -301,8 +368,12 @@ export default function MessagesPage() {
                   <div className="bg-purple-100 p-4 rounded-full mb-4 mx-auto w-16 h-16 flex items-center justify-center">
                     <MessageCircle className="h-8 w-8 text-purple-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Character</h3>
-                  <p className="text-gray-600">Choose an AI character from the list to start chatting</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Select a Character
+                  </h3>
+                  <p className="text-gray-600">
+                    Choose an AI character from the list to start chatting
+                  </p>
                 </div>
               </div>
             )}
@@ -311,4 +382,4 @@ export default function MessagesPage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

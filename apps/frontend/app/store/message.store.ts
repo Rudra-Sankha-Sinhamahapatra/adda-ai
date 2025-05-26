@@ -24,7 +24,7 @@ interface Message {
 interface MessageState {
     messages: Message[];
     characters: Character[];
-    selectedCharacter: string;
+    selectedCharacter: string | null;
     currentUserId: string | null;
     isLoading: boolean;
     sending: boolean;
@@ -34,7 +34,7 @@ interface MessageState {
 
     setMessage: (message: string) => void;
     setSearchQuery: (query: string) => void;
-    setSelectedCharacter: (characterId: string) => void;
+    setSelectedCharacter: (characterId: string | null) => void;
     fetchCharacters: () => Promise<void>;
     loadMessages: (characterId: string, userId: string) => Promise<void>;
     sendMessage: (content: string) => Promise<void>;
@@ -57,7 +57,7 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     setSelectedCharacter: (characterId) => {
         set({ selectedCharacter: characterId });
         const userId = get().currentUserId;
-        if (userId) {
+        if (userId && characterId) {
             get().loadMessages(characterId, userId);
         }
     },
