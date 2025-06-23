@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "db:generate": "cd packages/db && prisma generate && cd ../..",
-    "db:push": "cd packages/db && prisma db push && cd ../..",
-    "db:studio": "cd packages/db && prisma studio && cd ../..",
-    "db:migrate": "cd packages/db && prisma migrate dev && cd ../.."
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev"
   },
   "keywords": [],
   "author": "",
