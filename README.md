@@ -2,6 +2,11 @@
 
 An intelligent AI character chatting platform that enables users to engage in meaningful conversations with diverse AI personalities. Built with advanced vector embedding technology for contextual memory and semantic search capabilities.
 
+## Demo Video
+
+https://github.com/user-attachments/assets/9da21f62-76aa-4133-9f9e-db6ee33dab97
+
+
 ## 🌟 Features
 
 ### 🤖 AI Character Interactions
