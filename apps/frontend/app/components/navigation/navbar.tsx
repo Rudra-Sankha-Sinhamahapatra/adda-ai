@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/auth.store';
+import { UserIcon } from "@repo/ui/userIcon"
 
 export default function Navbar() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow">
+    <nav className="bg-white shadow sticky top-0 z-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
           <div className="flex">
@@ -80,11 +81,7 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                   <span className="sr-only">Open user menu</span>
-                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <span className="text-sm font-medium text-purple-600">
-                      {user.name[0].toUpperCase()}
-                    </span>
-                  </div>
+                 <UserIcon user={user} />
                 </button>
               </div>
               {isMenuOpen && (

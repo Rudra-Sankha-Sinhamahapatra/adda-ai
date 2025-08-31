@@ -17,6 +17,8 @@ import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import ProtectedRoute from "../../components/auth/protected-route";
 import { useMessageStore } from "../../store/message.store";
+import { useAuthStore } from "@/app/store/auth.store";
+import { UserIcon } from "@repo/ui/userIcon";
 
 export default function MessagesPage() {
   const {
@@ -41,7 +43,7 @@ export default function MessagesPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const initialMessageSent = useRef<boolean>(false);
   const [showChatMobile, setShowChatMobile] = useState(false);
-
+  const currentUser = useAuthStore( (state) =>state.user);
   const currentCharacter = characters.find(
     (char) => char.id === selectedCharacter
   );
@@ -102,7 +104,7 @@ export default function MessagesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
+      <div className="min-h-vh bg-gradient-to-br from-purple-50 to-indigo-50">
         <div className="container mx-auto px-0 md:px-4 py-0 md:py-6">
           <div
             className={`grid grid-cols-12 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[85vh] ${!selectedCharacter ? "md:grid-cols-4 lg:grid-cols-3" : ""}`}
@@ -231,25 +233,25 @@ export default function MessagesPage() {
                           variant="ghost"
                           className="absolute right-2 top-1.5 text-purple-600"
                         >
-                          <History className="h-4 w-4" />
+                          {/* <History className="h-4 w-4" /> */}
                         </Button>
                       </form>
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         className="text-purple-600 border-purple-200 hover:bg-purple-50"
                       >
                         <Clock className="h-5 w-5 mr-1" />
                         <span className="hidden sm:inline">History</span>
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         className="text-purple-600 border-purple-200 hover:bg-purple-50"
                       >
                         <Sparkles className="h-5 w-5 mr-1" />
                         <span className="hidden sm:inline">Boost</span>
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 )}
@@ -322,7 +324,7 @@ export default function MessagesPage() {
                                 </div>
                                 {senderType === "user" && (
                                   <div className="h-8 w-8 rounded-full overflow-hidden ml-3 mb-1 bg-purple-200 flex items-center justify-center flex-shrink-0 mr-2">
-                                    <User className="h-5 w-5 text-purple-700" />
+                                    {currentUser ?           <UserIcon user={currentUser}/> : <User/>}
                                   </div>
                                 )}
                               </div>
