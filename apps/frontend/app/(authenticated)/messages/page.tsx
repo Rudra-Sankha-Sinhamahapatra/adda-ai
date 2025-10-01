@@ -7,11 +7,9 @@ import {
   Star,
   User,
   Send,
-  Clock,
-  Sparkles,
-  History,
   ArrowLeft,
   MessageCircle,
+  X,
 } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
@@ -161,7 +159,7 @@ export default function MessagesPage() {
                           </div>
                           <span
                             className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${
-                              character.status === "online"
+                              character.status === "ACTIVE"
                                 ? "bg-green-400"
                                 : character.status === "thinking"
                                   ? "bg-yellow-400"
@@ -169,9 +167,9 @@ export default function MessagesPage() {
                             }`}
                           />
                         </div>
-                        <div className="flex-1 text-left">
-                          <h3 className="font-semibold">{character.name}</h3>
-                          <p className="text-sm text-gray-500 truncate">
+                        <div className="flex-1 text-left min-w-0">
+                          <h3 className="font-semibold truncate">{character.name}</h3>
+                          <p className="text-sm text-gray-500 line-clamp-2">
                             {character.description}
                           </p>
                         </div>
@@ -226,6 +224,14 @@ export default function MessagesPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedCharacter(null)}
+                        className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
                       <form onSubmit={handleSearch} className="relative">
                         <Button
                           type="submit"

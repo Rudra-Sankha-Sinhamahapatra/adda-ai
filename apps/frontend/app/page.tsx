@@ -5,7 +5,7 @@ import { Button } from '@repo/ui/button';
 import { ChevronRight, MessageCircle, Users, Sparkles, Globe, Shield, Zap } from 'lucide-react';
 import { useAuthStore } from './store/auth.store';
 import { Route } from 'next';
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { useRef } from 'react';
 
 export default function Home() {
@@ -13,12 +13,18 @@ export default function Home() {
   const signOut = useAuthStore((state) => state.signOut);
 
   const heroRef = useRef<HTMLDivElement>(null);
+  const experienceRef = useRef<HTMLDivElement>(null);
+  const whyChooseRef = useRef<HTMLDivElement>(null);
+  
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"]
   });
   const y = useTransform(scrollYProgress, [0, 0.50, 0.75, 1], [0, -40, -200, -200]);
   const opacity = useTransform(scrollYProgress, [0, 0.45, 0.68, 1], [1, 1, 0, 0]);
+
+  const isExperienceInView = useInView(experienceRef, { margin: "-100px" });
+  const isWhyChooseInView = useInView(whyChooseRef, { margin: "-100px" });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
@@ -115,7 +121,7 @@ export default function Home() {
                 </Button>
               </Link>
             )}
-            <Link href={'/about' as Route}>
+            <Link href={'/explore' as Route}>
               <Button variant="outline" size="lg" className="min-w-[200px] py-2 cursor-pointer border-purple-600">
                 View Characters
               </Button>
@@ -139,8 +145,12 @@ export default function Home() {
       </section >
 
 
-      < section className="container mx-auto px-4 py-20" >
-        <div className="mb-12 text-center">
+      < section className="container mx-auto px-4 py-20" ref={experienceRef} >
+        <motion.div 
+          className="mb-12 text-center"
+          animate={isExperienceInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
             Experience AI Characters Like Never Before
           </h2>
@@ -148,45 +158,69 @@ export default function Home() {
             Our AI companions combine personality, knowledge, and emotional intelligence
             to create truly engaging conversations and meaningful interactions.
           </p>
-        </div>
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl">
+        </motion.div>
+        <motion.div 
+          className="grid gap-8 md:grid-cols-3"
+          animate={isExperienceInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+        >
+          <motion.div 
+            className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            animate={isExperienceInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+          >
             <div className="mb-4 rounded-full bg-purple-100 p-3 w-12 h-12 flex items-center justify-center group-hover:bg-purple-600 transition-colors">
               <MessageCircle className="h-6 w-6 text-purple-600 group-hover:text-white transition-colors" />
             </div>
             <h3 className="mb-2 text-xl font-semibold text-gray-900">Natural Conversations</h3>
             <p className="text-gray-600">Chat with AI characters that understand context, remember your interactions, and respond naturally.</p>
-          </div>
+          </motion.div>
 
-          <div className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl">
+          <motion.div 
+            className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            animate={isExperienceInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+          >
             <div className="mb-4 rounded-full bg-pink-100 p-3 w-12 h-12 flex items-center justify-center group-hover:bg-pink-600 transition-colors">
               <Users className="h-6 w-6 text-pink-600 group-hover:text-white transition-colors" />
             </div>
             <h3 className="mb-2 text-xl font-semibold text-gray-900">Diverse Characters</h3>
             <p className="text-gray-600">Choose from a wide range of AI personalities, each with unique traits, knowledge, and conversation styles.</p>
-          </div>
+          </motion.div>
 
-          <div className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl">
+          <motion.div 
+            className="group rounded-xl bg-white p-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            animate={isExperienceInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
+          >
             <div className="mb-4 rounded-full bg-purple-100 p-3 w-12 h-12 flex items-center justify-center group-hover:bg-purple-600 transition-colors">
               <Sparkles className="h-6 w-6 text-purple-600 group-hover:text-white transition-colors" />
             </div>
             <h3 className="mb-2 text-xl font-semibold text-gray-900">Memory & Learning</h3>
             <p className="text-gray-600">AI companions that remember your conversations and adapt to your interaction style over time.</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section >
 
-      < section className="bg-purple-50 py-20" >
+      < section className="bg-purple-50 py-20" ref={whyChooseRef} >
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
+          <motion.div 
+            className="mb-12 text-center"
+            animate={isWhyChooseInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
               Why Choose Adda AI Characters?
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-gray-600">
               Experience companionship, learning, and entertainment through advanced AI interactions.
             </p>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          </motion.div>
+          <motion.div 
+            className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+            animate={isWhyChooseInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          >
             {[
               {
                 icon: Globe,
@@ -219,15 +253,24 @@ export default function Home() {
                 description: "Characters that evolve and adapt to your conversation style."
               }
             ].map((benefit, index) => (
-              <div key={index} className="rounded-xl bg-white p-6 shadow transition-all hover:shadow-lg">
+              <motion.div 
+                key={index} 
+                className="rounded-xl bg-white p-6 shadow transition-all hover:shadow-lg"
+                animate={isWhyChooseInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                transition={{ 
+                  duration: 0.6, 
+                  ease: "easeOut", 
+                  delay: 0.3 + (index * 0.1) 
+                }}
+              >
                 <div className="mb-4 rounded-full bg-purple-100 p-3 w-12 h-12 flex items-center justify-center">
                   <benefit.icon className="h-6 w-6 text-purple-600" />
                 </div>
                 <h3 className="mb-2 text-xl font-semibold text-gray-900">{benefit.title}</h3>
                 <p className="text-gray-600">{benefit.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section >
 
@@ -263,7 +306,7 @@ export default function Home() {
                 </Button>
               </Link>
             )}
-            <Link href={'/about' as Route}>
+            <Link href={'/explore' as Route}>
               <Button size="lg" variant="outline" className="min-w-[200px] border-white text-white hover:bg-white/10 py-2">
                 View Characters
               </Button>
