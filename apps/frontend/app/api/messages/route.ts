@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
     `.trim();
 
     const result = streamText({
-      model: googleAI('gemini-2.0-flash'),
+      model: googleAI('gemini-2.5-flash-lite'),
       system: characterContext,
       messages: [
         ...combinedMessages,
